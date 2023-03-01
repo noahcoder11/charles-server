@@ -1,5 +1,6 @@
 import os from 'os'
 import express from 'express'
+import fetch from 'node-fetch'
 
 export default class HarmonyDevice {
     
@@ -13,7 +14,6 @@ export default class HarmonyDevice {
         this.hostAddress = hostAddress
         this.port = port
         this.expressApp = express()
-        this.requestHandler = new HarmonyRequestHandler()
         this.commandHandler = commandHandler
     }
 
@@ -37,11 +37,11 @@ Attributes: ${JSON.stringify(attrs)}
     async makeRequest(path, params = {}) {
         let url = `http://${this.hostAddress}:${this.port}/${path}?`
 
-        for (let [key, value] in Object.entries(params)) {
-            url += `${key}=${value}&`
+        for (let key in params) {
+            url += `${key}=${params[key]}&`
         }
 
-        url.pop()
+        url = url.slice(0, -1)
 
         let fetchResult = await fetch(url)
         
@@ -191,7 +191,7 @@ Attributes: ${JSON.stringify(attrs)}
         })
 
         this.expressApp.get('/command', (req, res) => {
-            data = this.command(req.query)
+            let data = this.command(req.query)
             res.send(data)
         })
 
